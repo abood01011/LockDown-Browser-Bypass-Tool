@@ -27,10 +27,6 @@ The installer will automatically download and install the required components.
 
 ---
 
-## ⚠️ Disclaimer
-
-This tool is provided for **educational and accessibility purposes only**. Users are responsible for ensuring compliance with their institution's academic integrity policies. Unauthorized use during examinations may violate academic codes of conduct.
-
 ## Features
 
 - 🪟 **Window Switching**: Use Alt+Tab and other window management shortcuts
