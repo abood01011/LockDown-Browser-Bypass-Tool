@@ -1,0 +1,10 @@
+{
+  "hotkeys": {
+    "nextTab": "Ctrl+Shift+T",
+    "prevTab": "Ctrl+Shift+W",
+    "minimize": "Ctrl+Shift+M",
+    "exitTool": "Ctrl+Shift+Q"
+  },
+  "stealthMode": true,
+  "autoStart": false
+}
