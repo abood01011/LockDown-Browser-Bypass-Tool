@@ -1,0 +1,60 @@
+name: Test macOS Build
+
+on:
+  push:
+    paths:
+      - 'LockDownBypass.Mac/**'
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET 8
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore LockDownBypass.Mac/LockDownBypass.Mac.csproj
+
+    - name: Build
+      run: dotnet publish LockDownBypass.Mac/LockDownBypass.Mac.csproj -c Release -r osx-x64 --self-contained true -p:PublishSingleFile=true
+
+    - name: Verify binary
+      run: |
+        BINARY="LockDownBypass.Mac/bin/Release/net8.0/osx-x64/publish/LockDownBypass"
+        file "$BINARY"
+        MAGIC=$(xxd -l 4 -p "$BINARY")
+        if [ "$MAGIC" = "cffaedfe" ]; then
+          echo "VERIFIED: Mach-O 64-bit executable"
+        else
+          echo "ERROR: Not a valid Mach-O binary (magic: $MAGIC)"
+          exit 1
+        fi
+
+    - name: Smoke test
+      run: |
+        BINARY="LockDownBypass.Mac/bin/Release/net8.0/osx-x64/publish/LockDownBypass"
+        chmod +x "$BINARY"
+        "$BINARY" &
+        PID=$!
+        sleep 3
+        if kill -0 $PID 2>/dev/null; then
+          echo "PASS: Process is running (PID: $PID)"
+        else
+          echo "FAIL: Process exited prematurely"
+          exit 1
+        fi
+        kill $PID 2>/dev/null
+        sleep 1
+        LOG="$HOME/Library/Logs/LockDownBypass/log.txt"
+        if [ -f "$LOG" ]; then
+          echo "PASS: Log file created"
+          cat "$LOG"
+        else
+          echo "WARN: No log file (expected without LockDown running)"
+        fi
