@@ -1,7 +1,29 @@
 name: Test macOS Build
 on: [push, workflow_dispatch]
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  build-and-test:
+    runs-on: macos-latest
     steps:
-    - run: echo "hello from $(uname)"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Build
+        run: dotnet publish LockDownBypass.Mac/LockDownBypass.Mac.csproj -c Release -r osx-x64 --self-contained true -p:PublishSingleFile=true
+      - name: Verify
+        run: |
+          BINARY="LockDownBypass.Mac/bin/Release/net8.0/osx-x64/publish/LockDownBypass"
+          file "$BINARY"
+          MAGIC=$(od -An -tx1 -N4 "$BINARY" | tr -d ' ')
+          echo "Magic: $MAGIC"
+          [ "$MAGIC" = "cffaedfe" ] && echo "MATCH" || echo "MISMATCH"
+      - name: Smoke test
+        run: |
+          BINARY="LockDownBypass.Mac/bin/Release/net8.0/osx-x64/publish/LockDownBypass"
+          chmod +x "$BINARY"
+          "$BINARY" &
+          PID=$!
+          sleep 3
+          kill -0 $PID && echo "PASS" || (echo "FAIL" && exit 1)
+          kill $PID 2>/dev/null
+          echo "DONE"
