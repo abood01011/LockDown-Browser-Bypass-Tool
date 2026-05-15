@@ -2,6 +2,6 @@ name: Test macOS Build
 on: [push, workflow_dispatch]
 jobs:
   test:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
-    - run: echo "hello macos"
+    - run: echo "hello from $(uname)"
