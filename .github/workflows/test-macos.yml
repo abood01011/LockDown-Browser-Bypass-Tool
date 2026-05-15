@@ -1,29 +1,32 @@
-name: Test macOS Build
-on: [push, workflow_dispatch]
+name: Build & Test macOS
+on:
+  push:
+    paths:
+      - 'LockDownBypass.Mac/**'
+      - '.github/workflows/**'
+  workflow_dispatch:
 jobs:
-  build-and-test:
+  build:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
-      - name: Build
+      - name: Publish
         run: dotnet publish LockDownBypass.Mac/LockDownBypass.Mac.csproj -c Release -r osx-x64 --self-contained true -p:PublishSingleFile=true
-      - name: Verify
+      - name: Validate
         run: |
-          BINARY="LockDownBypass.Mac/bin/Release/net8.0/osx-x64/publish/LockDownBypass"
-          file "$BINARY"
-          MAGIC=$(od -An -tx1 -N4 "$BINARY" | tr -d ' ')
-          echo "Magic: $MAGIC"
-          [ "$MAGIC" = "cffaedfe" ] && echo "MATCH" || echo "MISMATCH"
-      - name: Smoke test
+          BIN=LockDownBypass.Mac/bin/Release/net8.0/osx-x64/publish/LockDownBypass
+          file "$BIN"
+          file "$BIN" | grep -q "Mach-O" && echo "OK: Mach-O binary" || (echo "FAIL: Not Mach-O" && exit 1)
+      - name: Smoke
         run: |
-          BINARY="LockDownBypass.Mac/bin/Release/net8.0/osx-x64/publish/LockDownBypass"
-          chmod +x "$BINARY"
-          "$BINARY" &
+          BIN=LockDownBypass.Mac/bin/Release/net8.0/osx-x64/publish/LockDownBypass
+          chmod +x "$BIN"
+          "$BIN" &
           PID=$!
           sleep 3
-          kill -0 $PID && echo "PASS" || (echo "FAIL" && exit 1)
+          kill -0 $PID && echo "PASS: Running" || (echo "FAIL: Crashed" && exit 1)
           kill $PID 2>/dev/null
-          echo "DONE"
+          echo "Smoke test passed"
