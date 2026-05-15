@@ -1,0 +1,14 @@
+{
+  "hotkeys": {
+    "nextTab": "Ctrl+Shift+T",
+    "prevTab": "Ctrl+Shift+W",
+    "minimize": "Ctrl+Shift+M",
+    "switchWindow": "Ctrl+Shift+Tab",
+    "capture": "Ctrl+Shift+Alt+C",
+    "captureSend": "Ctrl+Shift+Alt+W",
+    "copy": "Ctrl+Shift+X",
+    "exitTool": "Ctrl+Shift+Q"
+  },
+  "stealthMode": true,
+  "autoStart": true
+}

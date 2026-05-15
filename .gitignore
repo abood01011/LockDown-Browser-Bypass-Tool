@@ -1,0 +1,16 @@
+# Build output
+bin/
+obj/
+[Bb]uild/
+
+# VS files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# macOS DS_Store
+.DS_Store
+
+# Logs
+*.log
